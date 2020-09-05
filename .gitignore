@@ -96,6 +96,7 @@ Thumbs.db
 *,cover
 htmlcov
 
+
 # Things specific to this project #
 ###################################
 /.anaconda
