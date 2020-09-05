@@ -1,0 +1,3 @@
+E:\GPhoto\toGPhoto\Париж\CIMG0974.JPGE:\GPhoto\toGPhoto\Париж\CIMG0974.JPGCould not load "" 
+Reason: "broken data stream when reading image file"
+Please see documentation at: http://pillow.readthedocs.io/en/latest/installation.html#external-libraries

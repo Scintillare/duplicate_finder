@@ -1,3 +1,4 @@
 DISTANCE_CUTOFF = 0.4
 
 BASE_DIR = 'E:\\GPhoto'
+GROUPS_DIR = 'E:\\Groups'

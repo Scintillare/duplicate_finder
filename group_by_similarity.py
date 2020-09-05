@@ -1,44 +1,41 @@
-os.mkdir(path, mode=0o777, *, dir_fd=None)
-os.makedirs(name, mode=0o777, exist_ok=False)
-Recursive directory creation function. Like mkdir(), but makes all intermediate-level directories needed to contain the leaf directory.
+import config
+import os
+from os.path import join
+from elasticsearch import Elasticsearch
+from image_match.elasticsearch_driver import SignatureES
+from PIL import Image
+import shutil
 
-os.remove(path, *, dir_fd=None)
-Remove (delete) the file path. If path is a directory, an IsADirectoryError is raised. Use rmdir() to remove directories.
+base_dir = config.BASE_DIR
+group_dir = config.GROUPS_DIR
+es = Elasticsearch()
+ses = SignatureES(es, distance_cutoff=config.DISTANCE_CUTOFF)
 
-os.removedirs(name)
-Remove directories recursively. Works like rmdir() except that,
-
-os.rename(src, dst, *, src_dir_fd=None, dst_dir_fd=None)
-
-os.renames(old, new)
-
-os.rmdir(path, *, dir_fd=None)
-Remove (delete) the directory path.
-
+unic_dir = join(group_dir, 'unics')
+os.mkdir(unic_dir)
 
 for root, dirs, files in os.walk(base_dir):
-    # print(root, "consumes", end=" ")
-    # print(sum(getsize(join(root, name))/1024 for name in files), end=" ")
-    # print("mbytes in", len(files), "non-directory files")
-    # if 'CVS' in dirs:
-    #     dirs.remove('CVS')  # don't visit CVS directories
-
-# os.listdir(path='.')
-# os.scandir(path='.')
-# Return an iterator of os.DirEntry objects
-# is_dir() and is_file() 
-
-# with os.scandir(path) as it:
-#     for entry in it:
-#         if not entry.name.startswith('.') and entry.is_file():
-#             print(entry.name)
-
-'''
-really remove
-import os
-for root, dirs, files in os.walk(top, topdown=False):
     for name in files:
-        os.remove(os.path.join(root, name))
-    for name in dirs:
-        os.rmdir(os.path.join(root, name))
-'''
+        fn = join(root, name)
+        print(fn)
+        similar = ses.search_image(fn)
+        if len(similar) != 1:
+            cur_dir = join(group_dir, f'{name}_{len(similar)}')
+            os.mkdir(cur_dir)
+        else:
+            cur_dir = unic_dir
+        for record in similar:
+            img_path = record['path']
+            yield #TODO
+            try:
+                # shutil.move(img_path, cur_dir)
+                # os.remove(fn)
+            except Exception as e:
+                print(e)
+                print(img_path)
+
+        # for r in res:
+        #     im = Image.open(r['path'])
+        #     im.show()
+
+        exit()
