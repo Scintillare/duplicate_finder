@@ -19,23 +19,26 @@ from os.path import join
 from elasticsearch import Elasticsearch
 from image_match.elasticsearch_driver import SignatureES
 
-base_dir = config.BASE_DIR
-es = Elasticsearch()
-ses = SignatureES(es, distance_cutoff=config.DISTANCE_CUTOFF)
 
-for root, dirs, files in os.walk(base_dir):
-    for name in files:
-        fn = join(root, name)
-        if ('jpg' in fn 
-            or 'JPG' in fn
-            or 'jpeg' in fn 
-            or 'png' in fn):
-            try:
-                ses.add_image(fn)
-                print(fn)
-            except Exception as e:
-                with open('err_log.txt', mode='a') as log:
-                    log.write(fn)
-                    log.write(str(e))
+def add_images():
+    base_dir = config.BASE_DIR
+    
+    es = Elasticsearch()
+    ses = SignatureES(es, distance_cutoff=config.DISTANCE_CUTOFF)
+
+    for root, dirs, files in os.walk(base_dir):
+        for name in files:
+            fn = join(root, name)
+            if ('jpg' in fn 
+                or 'JPG' in fn
+                or 'jpeg' in fn 
+                or 'png' in fn):
+                try:
+                    ses.add_image(fn)
+                    print(fn)
+                except Exception as e:
+                    with open('err_log.txt', mode='a') as log:
+                        log.write(fn)
+                        log.write(str(e))
 
 
