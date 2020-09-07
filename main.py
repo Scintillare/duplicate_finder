@@ -33,17 +33,37 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         lbl_img = Label() 
         pixmap = QtGui.QPixmap(img_path)
-        lbl_img.setPixmap(pixmap.scaled(scrollArea.width(), scrollArea.height(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation))
+        lbl_img.setPixmap(pixmap)
         lbl_img.setScaledContents(True)
+        
         like_checkbox = QtWidgets.QCheckBox(text="Like")
         like_checkbox.setCheckState(True)
         like_checkbox.setTristate(False)
         lbl_path = QtWidgets.QLabel(text=img_path)
+        like_checkbox.setStyleSheet('''
+                QCheckBox {
+                    spacing: 5px;
+                    font-size:25px;     
+                }
+
+                QCheckBox::indicator {
+                        width: 50px;
+                        height: 50px;
+                }
+
+                QCheckBox::indicator:unchecked {
+                    image: url(./images/unlike.png);
+                }
+
+                QCheckBox::indicator:checked {
+                    image: url(./images/like.png);
+                }
+        ''')
 
         vert_layout = QtWidgets.QVBoxLayout()
+        vert_layout.addWidget(lbl_path, 0, QtCore.Qt.AlignHCenter)
         vert_layout.addWidget(lbl_img)
         vert_layout.addWidget(like_checkbox, 0, QtCore.Qt.AlignHCenter)
-        vert_layout.addWidget(lbl_path, 0, QtCore.Qt.AlignHCenter)
 
         scrollArea.setLayout(vert_layout)
         lbl_img.adjustSize()
@@ -69,6 +89,15 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
 def main():
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
+    QtWidgets.QStyleFactory
+    app.setStyle(QtWidgets.QStyleFactory.create("Fusion"));
+    p = app.palette()
+    p.setColor(QtGui.QPalette.Window, QtGui.QColor(53,53,53));
+    p.setColor(QtGui.QPalette.Button, QtGui.QColor(53,53,53));
+    p.setColor(QtGui.QPalette.Highlight, QtGui.QColor(142,45,197));
+    p.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(255,255,255));
+    p.setColor(QtGui.QPalette.WindowText, QtGui.QColor(255,255,255));
+    app.setPalette(p);
     window = DuplApp()  # Создаём объект класса ExampleApp
     window.show()  # Показываем окно
     window.setWindowState(QtCore.Qt.WindowMaximized)
