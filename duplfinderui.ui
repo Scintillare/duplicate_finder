@@ -19,7 +19,7 @@
   <property name="font">
    <font>
     <family>Segoe UI</family>
-    <pointsize>10</pointsize>
+    <pointsize>12</pointsize>
    </font>
   </property>
   <property name="windowTitle">
@@ -49,7 +49,10 @@
       <property name="font">
        <font>
         <family>Segoe UI</family>
-        <pointsize>14</pointsize>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+        <underline>false</underline>
        </font>
       </property>
       <property name="autoFillBackground">
@@ -80,7 +83,7 @@
      <x>0</x>
      <y>0</y>
      <width>676</width>
-     <height>29</height>
+     <height>34</height>
     </rect>
    </property>
   </widget>

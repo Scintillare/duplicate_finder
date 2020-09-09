@@ -1,6 +1,6 @@
 from duplui import Ui_MainWindow
 from PyQt5 import QtWidgets, QtGui, QtCore
-import sys
+import sys, os
 from group_by_similarity import get_similar_groups
 from resize_label import Label
 
@@ -8,7 +8,7 @@ from resize_label import Label
 #pyuic5 path/to/design.ui -o output/path/to/design.py
 
 
-# const QString message = tr("Opened \"%1\", %2x%3, Depth: %4")
+# TODO const QString message = tr("Opened \"%1\", %2x%3, Depth: %4")
 #         .arg(QDir::toNativeSeparators(fileName)).arg(image.width()).arg(image.height()).arg(image.depth());
 #     statusBar()->showMessage(message);
 
@@ -40,15 +40,20 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
         like_checkbox.setCheckState(True)
         like_checkbox.setTristate(False)
         lbl_path = QtWidgets.QLabel(text=img_path)
+        lbl_size = QtWidgets.QLabel(text=str(round(os.path.getsize(img_path)/(1024*1024), 2))+'Mb')
+        
+        font = lbl_path.font()
+        font.setPointSize(10)
+        lbl_path.setFont(font)
         like_checkbox.setStyleSheet('''
                 QCheckBox {
-                    spacing: 5px;
-                    font-size:25px;     
+                    spacing: 5px;  
+                    font: 20px "Segoe UI";
                 }
 
                 QCheckBox::indicator {
-                        width: 50px;
-                        height: 50px;
+                        width: 30px;
+                        height: 30px;
                 }
 
                 QCheckBox::indicator:unchecked {
@@ -59,11 +64,33 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
                     image: url(./images/like.png);
                 }
         ''')
+        self.remove_button.setStyleSheet(
+            '''
+            QPushButton {
+                background-color: rgb(235, 73, 86);
+                border-style: outset;
+                border-width: 2px;
+                border-radius: 10px;
+                border-color: brown;
+                padding: 6px;
+            }
+            QPushButton:pressed {
+                background-color: rgb(224, 0, 0);
+                border-style: inset;
+            }
+            '''
+        )
+
+        horiz_layout = QtWidgets.QHBoxLayout()
+        horiz_layout.addWidget(like_checkbox)#, 0, QtCore.Qt.AlignLeft)
+        horiz_layout.addWidget(lbl_size, 0, QtCore.Qt.AlignRight)
+
 
         vert_layout = QtWidgets.QVBoxLayout()
-        vert_layout.addWidget(lbl_path, 0, QtCore.Qt.AlignHCenter)
+        vert_layout.addWidget(lbl_path, 0, QtCore.Qt.AlignLeft) #QtCore.Qt.AlignHCenter)
         vert_layout.addWidget(lbl_img)
-        vert_layout.addWidget(like_checkbox, 0, QtCore.Qt.AlignHCenter)
+        vert_layout.addLayout(horiz_layout)
+        # vert_layout.addWidget(like_checkbox, 0, QtCore.Qt.AlignLeft) #QtCore.Qt.AlignHCenter)
 
         scrollArea.setLayout(vert_layout)
         lbl_img.adjustSize()
