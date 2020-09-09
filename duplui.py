@@ -39,7 +39,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.remove_button.sizePolicy().hasHeightForWidth())
         self.remove_button.setSizePolicy(sizePolicy)
-        self.remove_button.setMinimumSize(QtCore.QSize(150, 80))
+        self.remove_button.setMinimumSize(QtCore.QSize(1, 1))
         font = QtGui.QFont()
         font.setFamily("Segoe UI")
         font.setPointSize(12)

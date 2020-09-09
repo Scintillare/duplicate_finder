@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 import sys, os
 from group_by_similarity import get_similar_groups
 from resize_label import Label
+from collections import namedtuple
 
 
 #pyuic5 path/to/design.ui -o output/path/to/design.py
@@ -18,6 +19,9 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # и т.д. в файле design.py
         super().__init__()
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
+
+        self.Choice = namedtuple('Choice', ['path', 'checkbox'])
+        self.choices = []
 
         self._augmentUI()
         self._connectSignals()
@@ -41,6 +45,8 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
         like_checkbox.setTristate(False)
         lbl_path = QtWidgets.QLabel(text=img_path)
         lbl_size = QtWidgets.QLabel(text=str(round(os.path.getsize(img_path)/(1024*1024), 2))+'Mb')
+
+        self.choices.append(self.Choice(img_path, like_checkbox))
         
         font = lbl_path.font()
         font.setPointSize(10)
@@ -67,12 +73,13 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.remove_button.setStyleSheet(
             '''
             QPushButton {
+                width: 150px;
+                height: 70px;
                 background-color: rgb(235, 73, 86);
                 border-style: outset;
                 border-width: 2px;
                 border-radius: 10px;
                 border-color: brown;
-                padding: 6px;
             }
             QPushButton:pressed {
                 background-color: rgb(224, 0, 0);
@@ -90,7 +97,6 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
         vert_layout.addWidget(lbl_path, 0, QtCore.Qt.AlignLeft) #QtCore.Qt.AlignHCenter)
         vert_layout.addWidget(lbl_img)
         vert_layout.addLayout(horiz_layout)
-        # vert_layout.addWidget(like_checkbox, 0, QtCore.Qt.AlignLeft) #QtCore.Qt.AlignHCenter)
 
         scrollArea.setLayout(vert_layout)
         lbl_img.adjustSize()
@@ -100,6 +106,10 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.remove_button.clicked.connect(self._remove_clicked)
 
     def _remove_clicked(self):
+        for path, checkbox in self.choices:
+            if not checkbox.isChecked():
+                print(path) #FIXME remove image
+        self.choices = []
         self._addPhotoGroup(next(self.img_iterator))
 
 
@@ -117,18 +127,18 @@ class DuplApp(QtWidgets.QMainWindow, Ui_MainWindow):
 def main():
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
     QtWidgets.QStyleFactory
-    app.setStyle(QtWidgets.QStyleFactory.create("Fusion"));
+    app.setStyle(QtWidgets.QStyleFactory.create("Fusion"))
     p = app.palette()
-    p.setColor(QtGui.QPalette.Window, QtGui.QColor(53,53,53));
-    p.setColor(QtGui.QPalette.Button, QtGui.QColor(53,53,53));
-    p.setColor(QtGui.QPalette.Highlight, QtGui.QColor(142,45,197));
-    p.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(255,255,255));
-    p.setColor(QtGui.QPalette.WindowText, QtGui.QColor(255,255,255));
-    app.setPalette(p);
-    window = DuplApp()  # Создаём объект класса ExampleApp
-    window.show()  # Показываем окно
+    p.setColor(QtGui.QPalette.Window, QtGui.QColor(53,53,53))
+    p.setColor(QtGui.QPalette.Button, QtGui.QColor(53,53,53))
+    p.setColor(QtGui.QPalette.Highlight, QtGui.QColor(142,45,197))
+    p.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(255,255,255))
+    p.setColor(QtGui.QPalette.WindowText, QtGui.QColor(255,255,255))
+    app.setPalette(p)
+    window = DuplApp()  
+    window.show() 
     window.setWindowState(QtCore.Qt.WindowMaximized)
-    app.exec_()  # и запускаем приложение
+    app.exec_()  
 
 if __name__ == "__main__":
     main()
