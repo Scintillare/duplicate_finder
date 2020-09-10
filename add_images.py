@@ -24,15 +24,17 @@ def add_images():
     base_dir = config.BASE_DIR
     
     es = Elasticsearch()
+    es.indices.create(index='images', ignore=400)
+    # es.indices.delete(index='images', ignore=[400, 404])
     ses = SignatureES(es, distance_cutoff=config.DISTANCE_CUTOFF)
 
     for root, dirs, files in os.walk(base_dir):
         for name in files:
             fn = join(root, name)
-            if ('jpg' in fn 
-                or 'JPG' in fn
-                or 'jpeg' in fn 
-                or 'png' in fn):
+            if ('jpg' in fn
+                    or 'JPG' in fn
+                    or 'jpeg' in fn
+                    or 'png' in fn):
                 try:
                     ses.add_image(fn)
                     print(fn)
@@ -42,3 +44,5 @@ def add_images():
                         log.write(str(e))
 
 
+if __name__ == "__main__":
+    add_images()
