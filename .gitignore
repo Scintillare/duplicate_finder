@@ -106,3 +106,4 @@ htmlcov
 /docs/build
 *.orig
 CHANGELOG.temp
+/Trash
