@@ -3,13 +3,14 @@ from worker import Worker
 
 
 class Load_Widget(QtWidgets.QWidget):
+   
+    finished_signal = QtCore.pyqtSignal()
 
     def __init__(self, image_finder, *args, **kwargs):
         super(Load_Widget, self).__init__(*args, **kwargs)
         self.image_finder = image_finder
         self.threadpool = QtCore.QThreadPool()
         self.is_thread_stopped = False
-        self.finished_signal = QtCore.pyqtSignal()
         self.setupUi()
         self._connect_signals()
 
