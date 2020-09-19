@@ -8,18 +8,49 @@ from image_match.elasticsearch_driver import SignatureES
 
 class ImageFinder():
     def __init__(self):
-        self.BASE_DIR = None
+        self.BASE_DIR = None  # FIXME redundant
         self.DISTANCE_CUTOFF = 0.4
         self.es = Elasticsearch()
         self.ses = SignatureES(self.es, distance_cutoff=self.DISTANCE_CUTOFF)
         self.index_name = "images"
 
+    def es_iterate_all_documents(self, index, pagesize=250, scroll_timeout="1m", **kwargs):
+        """
+        https://techoverflow.net/2019/05/07/elasticsearch-how-to-iterate-scroll-through-all-documents-in-index/
+        Helper to iterate ALL values from a single index
+        Yields all the documents.
+        """
+        is_first = True
+        while True:
+            # Scroll next
+            if is_first: # Initialize scroll
+                result = self.es.search(index=index, scroll="1m", **kwargs, body={
+                    "size": pagesize
+                })
+                is_first = False
+            else:
+                result = self.es.scroll(body={
+                    "scroll_id": scroll_id,
+                    "scroll": scroll_timeout
+                })
+            scroll_id = result["_scroll_id"]
+            hits = result["hits"]["hits"]
+            # Stop after no more docs
+            if not hits:
+                break
+            # Yield each entry
+            yield from (hit['_source'] for hit in hits)
+
     def get_similar_groups(self):
-        for root, dirs, files in os.walk(self.BASE_DIR):
-            for name in files:
-                similar = self.ses.search_image(join(root, name))
-                if len(similar) != 1:
-                    yield [record['path'] for record in similar]
+        for entry in self.es_iterate_all_documents(index=self.index_name):
+            similar = self.ses.search_image(entry['path'])
+            if len(similar) != 1:
+                yield [record['path'] for record in similar]
+        # for root, dirs, files in os.walk(self.BASE_DIR):
+        #     for name in files:
+        #         similar = self.ses.search_image(join(root, name))
+        #         if len(similar) != 1:
+        #             yield [record['path'] for record in similar]
 
     def add_images(self):
         # self.es.indices.create(index=self.index_name, ignore=400)

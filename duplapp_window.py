@@ -18,9 +18,10 @@ class DuplApp(QtWidgets.QMainWindow):
         self.image_finder = ImageFinder()
         if self.image_finder.is_index_created():
             self.setCentralWidget(Compare_Widget(self.image_finder))
+            self.to_compare_scene()
         else:
             self.setCentralWidget(Load_Widget(self.image_finder))
-            self.centralWidget().finished_signal.connect(self.change_scene)
+            self.centralWidget().finished_signal.connect(self.to_compare_scene)
         # self.setCentralWidget(Load_Widget(self.image_finder))
 
         # self.Choice = namedtuple('Choice', ['path', 'checkbox'])
@@ -50,8 +51,9 @@ class DuplApp(QtWidgets.QMainWindow):
         # MainWindow.setSizePolicy(sizePolicy)
 
     @QtCore.pyqtSlot()
-    def change_scene(self):
+    def to_compare_scene(self):
         self.setCentralWidget(Compare_Widget(self.image_finder))
+        self.setWindowState(QtCore.Qt.WindowMaximized)
 
     def closeEvent(self, event):
         if isinstance(self.centralWidget(), Load_Widget):
