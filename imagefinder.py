@@ -45,12 +45,8 @@ class ImageFinder():
         for entry in self.es_iterate_all_documents(index=self.index_name):
             similar = self.ses.search_image(entry['path'])
             if len(similar) != 1:
-                yield [record['path'] for record in similar]
-        # for root, dirs, files in os.walk(self.BASE_DIR):
-        #     for name in files:
-        #         similar = self.ses.search_image(join(root, name))
-        #         if len(similar) != 1:
-        #             yield [record['path'] for record in similar]
+                print(similar)
+                yield [(record['path'], record['score']) for record in similar]
 
     def add_images(self):
         # self.es.indices.create(index=self.index_name, ignore=400)
@@ -65,7 +61,7 @@ class ImageFinder():
 
         for root, dirs, files in os.walk(self.BASE_DIR):
             for name in files:
-                fn = join(root, name)
+                fn = os.path.abspath(join(root, name))
                 *_, frmt = name.split('.')
                 if (frmt.lower() in img_formats):
                     try:

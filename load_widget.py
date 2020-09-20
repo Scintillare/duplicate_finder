@@ -46,15 +46,14 @@ class Load_Widget(QtWidgets.QWidget):
         # self.progressBar.setMaximum(0)
         self.progressBar.setTextVisible(False)
         self.progressBar.setVisible(False)
-        self.progressBar.setObjectName("progressBar")
         self.verticalLayout.addWidget(self.progressBar)
 
         self.textEdit = QtWidgets.QPlainTextEdit()
-        # self.textEdit.setVerticalScrollBarPolicy()
         self.textEdit.setReadOnly(True)
+        self.textEdit.setLineWrapMode(QtWidgets.QPlainTextEdit.WidgetWidth)
+        self.textEdit.setWordWrapMode(QtGui.QTextOption.WrapAnywhere)
         self.textEdit.setVisible(False)
         self.textEdit.setFont(QtGui.QFont("Segoe UI", pointSize=9))
-        self.textEdit.setObjectName("textEdit")
         self.verticalLayout.addWidget(self.textEdit)
 
         self.setLayout(self.verticalLayout)
