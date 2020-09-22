@@ -8,7 +8,7 @@ from image_match.elasticsearch_driver import SignatureES
 
 class ImageFinder():
     def __init__(self):
-        self.BASE_DIR = None  # FIXME redundant
+        self.BASE_DIR = None 
         self.DISTANCE_CUTOFF = 0.4
         self.es = Elasticsearch()
         self.ses = SignatureES(self.es, distance_cutoff=self.DISTANCE_CUTOFF)
@@ -45,7 +45,7 @@ class ImageFinder():
         for entry in self.es_iterate_all_documents(index=self.index_name):
             similar = self.ses.search_image(entry['path'])
             if len(similar) != 1:
-                yield [(record['path'], record['score']) for record in similar]
+                yield [record for record in similar]
 
     def add_images(self):
         # self.es.indices.create(index=self.index_name, ignore=400)
@@ -74,6 +74,11 @@ class ImageFinder():
 
     def delete_index(self):
         self.es.indices.delete(index=self.index_name, ignore=[400, 404])
+
+    def delete_doc(self, id):
+        # db.delete_by_query(index='reestr',doc_type='some_type', q={'name': 'Jacobian'})
+        # self.es.delete(es_index=self.index_name, id=id)
+        pass
 
     def is_index_created(self):
         return self.es.indices.exists(index=self.index_name)

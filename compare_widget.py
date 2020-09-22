@@ -1,15 +1,21 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from resize_label import Label
 import os
+import shutil
 from collections import namedtuple
 
 
 class Compare_Widget(QtWidgets.QWidget):
 
-    Choice = namedtuple('Choice', ['path', 'checkbox'])
+    Choice = namedtuple('Choice', ['record', 'checkbox'])
 
     def __init__(self, img_finder, *args, **kwargs):
         super(Compare_Widget, self).__init__(*args, **kwargs)
+        self.TRASH_DIR = './tmp_trash'
+        if not os.path.exists(self.TRASH_DIR):
+            os.mkdir(self.TRASH_DIR)
+
+        self.image_finder = img_finder
         self.img_iterator = img_finder.get_similar_groups()
         self.choices = []
 
@@ -20,12 +26,10 @@ class Compare_Widget(QtWidgets.QWidget):
     def _create_elements(self):
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.imgspace_widget = QtWidgets.QWidget()
-        self.imgspace_layout = QtWidgets.QGridLayout(
-            self.imgspace_widget)  # QHBoxLayout(self.imgspace_widget)
+        self.imgspace_layout = QtWidgets.QGridLayout(self.imgspace_widget)
         self.remove_button = QtWidgets.QPushButton("Remove")
         self.verticalLayout.addWidget(self.imgspace_widget)
-        self.verticalLayout.addWidget(
-            self.remove_button, 0, QtCore.Qt.AlignHCenter)
+        self.verticalLayout.addWidget(self.remove_button, 0, QtCore.Qt.AlignHCenter)
 
         self._add_photo_group(next(self.img_iterator))
 
@@ -63,7 +67,7 @@ class Compare_Widget(QtWidgets.QWidget):
         )
 
     def _get_image_area(self, img_record):
-        img_path, img_score = img_record
+        img_path, img_score = img_record['path'], img_record['score']
 
         scrollArea = QtWidgets.QScrollArea()
         scrollArea.setWidgetResizable(True)
@@ -85,7 +89,7 @@ class Compare_Widget(QtWidgets.QWidget):
         lbl_size = QtWidgets.QLabel(
             text=str(round(os.path.getsize(img_path)/(1024*1024), 2))+'Mb')
 
-        self.choices.append(self.Choice(img_path, like_checkbox))
+        self.choices.append(self.Choice(img_record, like_checkbox))
 
         bottom_line_hlayout = QtWidgets.QHBoxLayout()
         bottom_line_hlayout.addWidget(like_checkbox)
@@ -138,11 +142,36 @@ class Compare_Widget(QtWidgets.QWidget):
 
     @QtCore.pyqtSlot()
     def _slot_remove_clicked(self):
-        for path, checkbox in self.choices:
+        for record, checkbox in self.choices:
             if not checkbox.isChecked():
-                print(path)  # FIXME remove image
+                self._gently_remove(record)
         self.choices = []
         self._add_photo_group(next(self.img_iterator))
+
+    def _gently_remove(self, doc_record):
+        img_path = "%r" % doc_record['path']
+        try:
+            shutil.move(doc_record['path'], self.TRASH_DIR)
+        except Exception as e:
+            with open('err_log.txt', mode='a') as log:
+                log.write('shutil.move on compare_widget fail\n')
+                log.write(str(e))
+                return
+        try:
+            # os.remove(img_path)
+            os.remove(doc_record['path'])
+            self.image_finder.delete_doc(doc_record['id'])
+        except Exception as e:
+            with open('err_log.txt', mode='a') as log:
+                log.write('os.remove on compare_widget fail\n')
+                log.write(str(e))
+            fn = os.path.basename(doc_record['path'])
+            old_path = doc_record['path'].replace(fn, '')
+            trash = os.path.abspath(os.path.join(self.TRASH_DIR, fn))
+            shutil.move(trash, old_path)
+            exit()
+        
+        # TODO send2trash lib?
 
     def _clear_layout(self, layout):
         for i in reversed(range(layout.count())):
