@@ -45,7 +45,6 @@ class ImageFinder():
         for entry in self.es_iterate_all_documents(index=self.index_name):
             similar = self.ses.search_image(entry['path'])
             if len(similar) != 1:
-                print(similar)
                 yield [(record['path'], record['score']) for record in similar]
 
     def add_images(self):

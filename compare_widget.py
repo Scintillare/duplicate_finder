@@ -20,7 +20,8 @@ class Compare_Widget(QtWidgets.QWidget):
     def _create_elements(self):
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.imgspace_widget = QtWidgets.QWidget()
-        self.imgspace_layout = QtWidgets.QHBoxLayout(self.imgspace_widget)
+        self.imgspace_layout = QtWidgets.QGridLayout(
+            self.imgspace_widget)  # QHBoxLayout(self.imgspace_widget)
         self.remove_button = QtWidgets.QPushButton("Remove")
         self.verticalLayout.addWidget(self.imgspace_widget)
         self.verticalLayout.addWidget(
@@ -142,13 +143,20 @@ class Compare_Widget(QtWidgets.QWidget):
                 print(path)  # FIXME remove image
         self.choices = []
         self._add_photo_group(next(self.img_iterator))
-        
+
     def _clear_layout(self, layout):
         for i in reversed(range(layout.count())):
             layout.itemAt(i).widget().deleteLater()
 
     def _add_photo_group(self, img_group):
         self._clear_layout(self.imgspace_layout)
-        for record in img_group:
+        ncols = 3
+        for i, record in enumerate(img_group):
+            if len(img_group) % 4 == 0:
+                ncols = 2
+            elif len(img_group) % 3 == 0:
+                ncols = 3
+            row = i // ncols
+            col = i % ncols
             scrollArea = self._get_image_area(record)
-            self.imgspace_layout.addWidget(scrollArea)
+            self.imgspace_layout.addWidget(scrollArea, row, col)
