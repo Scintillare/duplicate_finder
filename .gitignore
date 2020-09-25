@@ -105,3 +105,4 @@ CHANGELOG.temp
 /Trash
 err_log.txt
 .gitignore
+/tmp*
