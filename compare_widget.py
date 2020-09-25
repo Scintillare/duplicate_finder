@@ -158,8 +158,7 @@ class Compare_Widget(QtWidgets.QWidget):
                 log.write(str(e))
                 return
         try:
-            # os.remove(img_path)
-            os.remove(doc_record['path'])
+            os.remove(img_path)
             self.image_finder.delete_doc(doc_record['id'])
         except Exception as e:
             with open('err_log.txt', mode='a') as log:
@@ -169,7 +168,7 @@ class Compare_Widget(QtWidgets.QWidget):
             old_path = doc_record['path'].replace(fn, '')
             trash = os.path.abspath(os.path.join(self.TRASH_DIR, fn))
             shutil.move(trash, old_path)
-            exit()
+            # FIXME show message for user
         
         # TODO send2trash lib?
 
