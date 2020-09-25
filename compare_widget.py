@@ -182,6 +182,11 @@ class Compare_Widget(QtWidgets.QWidget):
         self._clear_layout(self.imgspace_layout)
         ncols = 3
         for i, record in enumerate(img_group):
+            if not os.path.exists(record['path']):
+                if len(img_group) == 2:
+                    self.remove_button.click()
+                    break
+                continue
             if len(img_group) % 4 == 0:
                 ncols = 2
             elif len(img_group) % 3 == 0:

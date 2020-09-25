@@ -80,6 +80,7 @@ class ImageFinder():
         try:
             self.es.delete(index=self.index_name, doc_type='_doc', id=id, refresh=True)
         except Exception as e:
+            print('es delete fail')
             print(e)
             raise ElasticsearchException(e)
 
