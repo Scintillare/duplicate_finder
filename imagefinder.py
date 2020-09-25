@@ -77,8 +77,11 @@ class ImageFinder():
 
     def delete_doc(self, id):
         # db.delete_by_query(index='reestr',doc_type='some_type', q={'name': 'Jacobian'})
-        # self.es.delete(es_index=self.index_name, id=id)
-        pass
+        try:
+            self.es.delete(index=self.index_name, doc_type='_doc', id=id, refresh=True)
+        except Exception as e:
+            print(e)
+            raise ElasticsearchException(e)
 
     def is_index_created(self):
         return self.es.indices.exists(index=self.index_name)
