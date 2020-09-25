@@ -1,8 +1,9 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from resize_label import Label
+from resize_label import ImageLabel
 import os
 import shutil
 from collections import namedtuple
+
 
 
 class Compare_Widget(QtWidgets.QWidget):
@@ -77,10 +78,7 @@ class Compare_Widget(QtWidgets.QWidget):
         te_path.setLineWrapMode(QtWidgets.QPlainTextEdit.WidgetWidth)
         te_path.setWordWrapMode(QtGui.QTextOption.WrapAnywhere)
 
-        lbl_img = Label()
-        pixmap = QtGui.QPixmap(img_path)
-        lbl_img.setPixmap(pixmap)
-        lbl_img.setScaledContents(True)
+        lbl_img = ImageLabel(img_path)
 
         like_checkbox = QtWidgets.QCheckBox(text="Like")
         like_checkbox.setCheckState(True)
@@ -147,6 +145,7 @@ class Compare_Widget(QtWidgets.QWidget):
                 self._gently_remove(record)
         self.choices = []
         self._add_photo_group(next(self.img_iterator))
+
 
     def _gently_remove(self, doc_record):
         try:
