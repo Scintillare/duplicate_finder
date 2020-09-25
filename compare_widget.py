@@ -151,6 +151,7 @@ class Compare_Widget(QtWidgets.QWidget):
     def _gently_remove(self, doc_record):
         try:
             shutil.move(doc_record['path'], self.TRASH_DIR)
+            self.image_finder.delete_doc(doc_record['id'])
         except Exception as e:
             with open('err_log.txt', mode='a', encoding='utf-8') as log:
                 log.write('shutil.move on compare_widget fail\n')
