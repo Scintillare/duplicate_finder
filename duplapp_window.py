@@ -11,24 +11,22 @@ from collections import namedtuple
 #     statusBar()->showMessage(message);
 
 class DuplApp(QtWidgets.QMainWindow):
+
     def __init__(self):
         super().__init__()
         self._setup_ui()
 
         self.image_finder = ImageFinder()
+        self.compare_scene = Compare_Widget(self.image_finder)
+        self.load_scene = Load_Widget(self.image_finder)
+
+        self.load_scene.finished_signal.connect(self.to_compare_scene)
+        self.compare_scene.restarted_signal.connect(self.to_load_scene)
+
         if self.image_finder.is_index_created():
-            self.setCentralWidget(Compare_Widget(self.image_finder))
             self.to_compare_scene()
         else:
-            self.setCentralWidget(Load_Widget(self.image_finder))
-            self.centralWidget().finished_signal.connect(self.to_compare_scene)
-        # self.setCentralWidget(Load_Widget(self.image_finder))
-
-        # self.Choice = namedtuple('Choice', ['path', 'checkbox'])
-        # self.choices = []
-
-        # self._augment_UI()
-        # self._connect_signals()
+            self.to_load_scene()
 
     def _setup_ui(self):
         self.setObjectName("MainWindow")
@@ -52,8 +50,13 @@ class DuplApp(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def to_compare_scene(self):
-        self.setCentralWidget(Compare_Widget(self.image_finder))
+        self.setCentralWidget(self.compare_scene)
         self.setWindowState(QtCore.Qt.WindowMaximized)
+
+    @QtCore.pyqtSlot()
+    def to_load_scene(self):
+        self.setCentralWidget(self.load_scene)
+        self.setWindowState(QtCore.Qt.WindowMinimized)
 
     def closeEvent(self, event):
         if isinstance(self.centralWidget(), Load_Widget):

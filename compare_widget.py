@@ -8,6 +8,8 @@ from collections import namedtuple
 
 class Compare_Widget(QtWidgets.QWidget):
 
+    restarted_signal = QtCore.pyqtSignal()
+
     Choice = namedtuple('Choice', ['record', 'checkbox'])
 
     def __init__(self, img_finder, *args, **kwargs):
@@ -26,9 +28,11 @@ class Compare_Widget(QtWidgets.QWidget):
 
     def _create_elements(self):
         self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.restart_button = QtWidgets.QPushButton("Restart and delete index")
         self.imgspace_widget = QtWidgets.QWidget()
         self.imgspace_layout = QtWidgets.QGridLayout(self.imgspace_widget)
         self.remove_button = QtWidgets.QPushButton("Remove")
+        self.verticalLayout.addWidget(self.restart_button)
         self.verticalLayout.addWidget(self.imgspace_widget)
         self.verticalLayout.addWidget(self.remove_button, 0, QtCore.Qt.AlignHCenter)
 
@@ -46,6 +50,8 @@ class Compare_Widget(QtWidgets.QWidget):
         self.remove_button.setSizePolicy(sizePolicy)
         font = QtGui.QFont("Segoe UI", pointSize=12, weight=75)
         font.setBold(True)
+        self.restart_button.setFont(font)
+        self.remove_button.setFlat(True)
         self.remove_button.setFont(font)
         self.remove_button.setFlat(True)
         self.remove_button.setStyleSheet(
@@ -137,6 +143,13 @@ class Compare_Widget(QtWidgets.QWidget):
 
     def _connect_signals(self):
         self.remove_button.clicked.connect(self._slot_remove_clicked)
+        self.restart_button.clicked.connect(self._slot_restart_clicked)
+
+    @QtCore.pyqtSlot()
+    def _slot_restart_clicked(self):
+        #TODO are you sure, user? 
+        # self.image_finder.delete_index()
+        self.restarted_signal.emit()
 
     @QtCore.pyqtSlot()
     def _slot_remove_clicked(self):
@@ -145,7 +158,6 @@ class Compare_Widget(QtWidgets.QWidget):
                 self._gently_remove(record)
         self.choices = []
         self._add_photo_group(next(self.img_iterator))
-
 
     def _gently_remove(self, doc_record):
         try:
@@ -182,6 +194,11 @@ class Compare_Widget(QtWidgets.QWidget):
         self._clear_layout(self.imgspace_layout)
         ncols = 3
         for i, record in enumerate(img_group):
+            if not os.path.exists(record['path']):
+                if len(img_group) == 2:
+                    self.remove_button.click()
+                    break
+                continue
             if len(img_group) % 4 == 0:
                 ncols = 2
             elif len(img_group) % 3 == 0:

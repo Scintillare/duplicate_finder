@@ -15,7 +15,6 @@ class Load_Widget(QtWidgets.QWidget):
         self._connect_signals()
 
     def setupUi(self):
-        self.setBaseSize(500, 500)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
 
