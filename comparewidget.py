@@ -3,6 +3,7 @@ from resize_label import ImageLabel
 import os
 import shutil
 from collections import namedtuple
+from send2trash import send2trash
 
 
 class CompareWidget(QtWidgets.QWidget):
@@ -147,7 +148,7 @@ class CompareWidget(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def _slot_restart_clicked(self):
         #TODO are you sure, user? 
-        # self.image_finder.delete_index() TODO
+        self.image_finder.delete_index()
         self.restarted_signal.emit()
 
     @QtCore.pyqtSlot()
@@ -162,34 +163,49 @@ class CompareWidget(QtWidgets.QWidget):
     def _gently_remove(self, doc_record):
         try:
             shutil.move(doc_record['path'], self.TRASH_DIR)
+        except Exception as e:
+            with open('err_log.txt', mode='a', encoding='utf-8') as log:
+                log.write('\nshutil.move on compare_widget fail\n')
+                log.write(str(e))
+                return
+
+        try:
             self.image_finder.delete_doc(doc_record['id'])
         except Exception as e:
             with open('err_log.txt', mode='a', encoding='utf-8') as log:
-                log.write('shutil.move on compare_widget fail\n')
+                log.write('\nimgfinder.delete_doc on compare_widget fail\n')
                 log.write(str(e))
-                return
+            fn = os.path.basename(doc_record['path'])
+            old_path = doc_record['path'].replace(fn, '')
+            trash = os.path.abspath(os.path.join(self.TRASH_DIR, fn))
+            shutil.move(trash, old_path)
                 
-        # TODO remove image
+        # XXX image will be moved in temp folder instead deleting
         # img_path = "%r" % doc_record['path']
         # try:
-            # os.remove(img_path)
-            # os.remove(doc_record['path'])
-            # self.image_finder.delete_doc(doc_record['id'])
+        #     img_path = os.path.abspath(doc_record['path'])
+        #     os.remove(img_path)
+        #     self.image_finder.delete_doc(doc_record['id'])
         # except Exception as e:
         #     with open('err_log.txt', mode='a', encoding='utf-8') as log:
-        #         log.write('os.remove on compare_widget fail\n')
+        #         log.write('\nos.remove on compare_widget fail\n')
         #         log.write(str(e))
         #     fn = os.path.basename(doc_record['path'])
         #     old_path = doc_record['path'].replace(fn, '')
         #     trash = os.path.abspath(os.path.join(self.TRASH_DIR, fn))
         #     shutil.move(trash, old_path)
-            # FIXME show message for user
+        #     self.image_finder.add_doc(doc_record['path'])
+        #     # FIXME show message for user
         
-        # TODO send2trash lib?
 
     def _clear_layout(self, layout):
         for i in reversed(range(layout.count())):
             layout.itemAt(i).widget().deleteLater()
+
+    def delete_trash(self):
+        # TODO show message for user
+        # shutil.rmtree(self.TRASH_DIR)
+        send2trash(self.TRASH_DIR)
 
     def _add_photo_group(self, img_group):
         self._clear_layout(self.imgspace_layout)

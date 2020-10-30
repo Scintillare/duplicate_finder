@@ -78,10 +78,10 @@ class ImageFinder():
         self.es.indices.delete(index=self.index_name, ignore=[400, 404])
 
     def delete_doc(self, id):
-        # FIXME 
-        # db.delete_by_query(index='reestr',doc_type='some_type', q={'name': 'Jacobian'})
-        # self.es.delete(es_index=self.index_name, id=id)
-        pass
+        self.es.delete(index=self.index_name, doc_type='image', id=id)
+
+    def add_doc(self, file_path):
+        self.ses.add_image(file_path)
 
     def is_index_created(self):
         return self.es.indices.exists(index=self.index_name)

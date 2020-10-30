@@ -63,3 +63,6 @@ class DuplApp(QtWidgets.QMainWindow):
         if isinstance(self.centralWidget(), LoadWidget):
             # cancel database creating
             self.centralWidget().stop_button.click()
+        if isinstance(self.centralWidget(), CompareWidget):
+            # remove temp folder (or not)
+            self.centralWidget().delete_trash()
