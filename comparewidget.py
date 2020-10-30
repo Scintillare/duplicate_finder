@@ -5,16 +5,15 @@ import shutil
 from collections import namedtuple
 
 
-
-class Compare_Widget(QtWidgets.QWidget):
+class CompareWidget(QtWidgets.QWidget):
 
     restarted_signal = QtCore.pyqtSignal()
 
     Choice = namedtuple('Choice', ['record', 'checkbox'])
 
     def __init__(self, img_finder, *args, **kwargs):
-        super(Compare_Widget, self).__init__(*args, **kwargs)
-        self.TRASH_DIR = './tmp_trash'
+        super(CompareWidget, self).__init__(*args, **kwargs)
+        self.TRASH_DIR = './tmp_trash'  # TODO move var to config
         if not os.path.exists(self.TRASH_DIR):
             os.mkdir(self.TRASH_DIR)
 
@@ -148,7 +147,7 @@ class Compare_Widget(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def _slot_restart_clicked(self):
         #TODO are you sure, user? 
-        # self.image_finder.delete_index()
+        # self.image_finder.delete_index() TODO
         self.restarted_signal.emit()
 
     @QtCore.pyqtSlot()
@@ -158,6 +157,7 @@ class Compare_Widget(QtWidgets.QWidget):
                 self._gently_remove(record)
         self.choices = []
         self._add_photo_group(next(self.img_iterator))
+        
 
     def _gently_remove(self, doc_record):
         try:
@@ -169,6 +169,7 @@ class Compare_Widget(QtWidgets.QWidget):
                 log.write(str(e))
                 return
                 
+        # TODO remove image
         # img_path = "%r" % doc_record['path']
         # try:
             # os.remove(img_path)

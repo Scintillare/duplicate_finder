@@ -2,47 +2,44 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from worker import Worker
 
 
-class Load_Widget(QtWidgets.QWidget):
-   
+class LoadWidget(QtWidgets.QWidget):
+  
     finished_signal = QtCore.pyqtSignal()
 
     def __init__(self, image_finder, *args, **kwargs):
-        super(Load_Widget, self).__init__(*args, **kwargs)
+        super(LoadWidget, self).__init__(*args, **kwargs)
         self.image_finder = image_finder
         self.threadpool = QtCore.QThreadPool()
         self.is_thread_stopped = False
-        self.setupUi()
+        self._setup_ui()
         self._connect_signals()
 
-    def setupUi(self):
+    def _setup_ui(self):
         self.verticalLayout = QtWidgets.QVBoxLayout()
-        self.verticalLayout.setObjectName("verticalLayout")
 
         self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        label = QtWidgets.QLabel("Root Folder:")
-        self.horizontalLayout.addWidget(label)
+        self.horizontalLayout.addWidget(QtWidgets.QLabel("Root Folder:"))
+
         self.dir_lineEdit = QtWidgets.QLineEdit()
         self.dir_lineEdit.setEnabled(False)
-        self.dir_lineEdit.setObjectName("dir_lineEdit")
         self.horizontalLayout.addWidget(self.dir_lineEdit)
+
         self.browse_button = QtWidgets.QPushButton(text="Browse")
-        self.browse_button.setObjectName("browse_button")
         self.horizontalLayout.addWidget(self.browse_button)
+
         self.verticalLayout.addLayout(self.horizontalLayout)
 
-        self.horizLayout2 = QtWidgets.QHBoxLayout()
+        self.buttonLayout = QtWidgets.QHBoxLayout()
         self.start_button = QtWidgets.QPushButton(text="Start")
         self.stop_button = QtWidgets.QPushButton(text="Stop")
-        self.horizLayout2.addWidget(self.start_button)
-        self.horizLayout2.addWidget(self.stop_button)
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(False)
-        self.verticalLayout.addLayout(self.horizLayout2)
+        self.buttonLayout.addWidget(self.start_button)
+        self.buttonLayout.addWidget(self.stop_button)
+        
+        self.verticalLayout.addLayout(self.buttonLayout)
 
         self.progressBar = QtWidgets.QProgressBar()
-        # self.progressBar.setMinimum(0)
-        # self.progressBar.setMaximum(0)
         self.progressBar.setTextVisible(False)
         self.progressBar.setVisible(False)
         self.verticalLayout.addWidget(self.progressBar)
@@ -70,10 +67,10 @@ class Load_Widget(QtWidgets.QWidget):
             self.start_button.setEnabled(True)
 
     def _slot_start_clicked(self):
-        self.image_finder.BASE_DIR = self.dir_lineEdit.text()        
+        self.image_finder.BASE_DIR = self.dir_lineEdit.text()       
         self.stop_button.setEnabled(True)
         self.progressBar.setVisible(True)
-        self.progressBar.setMaximum(0)
+        self.progressBar.setMaximum(0)  # switch to endless progress line
         self.textEdit.setVisible(True)
         self.textEdit.clear()
 
@@ -89,7 +86,6 @@ class Load_Widget(QtWidgets.QWidget):
             QtCore.QMetaObject.invokeMethod(self.textEdit, "appendPlainText", 
                 QtCore.Qt.AutoConnection, QtCore.Q_ARG(str, img_path))
         self.finished_signal.emit()
-
 
     def _slot_stop_clicked(self):
         self.is_thread_stopped = True
