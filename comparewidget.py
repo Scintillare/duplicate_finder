@@ -3,16 +3,18 @@ from resize_label import ImageLabel
 import os
 import shutil
 from collections import namedtuple
+from send2trash import send2trash
 
 
+class CompareWidget(QtWidgets.QWidget):
 
-class Compare_Widget(QtWidgets.QWidget):
+    restarted_signal = QtCore.pyqtSignal()
 
     Choice = namedtuple('Choice', ['record', 'checkbox'])
 
     def __init__(self, img_finder, *args, **kwargs):
-        super(Compare_Widget, self).__init__(*args, **kwargs)
-        self.TRASH_DIR = './tmp_trash'
+        super(CompareWidget, self).__init__(*args, **kwargs)
+        self.TRASH_DIR = './tmp_trash'  # TODO move var to config
         if not os.path.exists(self.TRASH_DIR):
             os.mkdir(self.TRASH_DIR)
 
@@ -26,9 +28,11 @@ class Compare_Widget(QtWidgets.QWidget):
 
     def _create_elements(self):
         self.verticalLayout = QtWidgets.QVBoxLayout()
+        self.restart_button = QtWidgets.QPushButton("Restart and delete index")
         self.imgspace_widget = QtWidgets.QWidget()
         self.imgspace_layout = QtWidgets.QGridLayout(self.imgspace_widget)
         self.remove_button = QtWidgets.QPushButton("Remove")
+        self.verticalLayout.addWidget(self.restart_button)
         self.verticalLayout.addWidget(self.imgspace_widget)
         self.verticalLayout.addWidget(self.remove_button, 0, QtCore.Qt.AlignHCenter)
 
@@ -46,6 +50,8 @@ class Compare_Widget(QtWidgets.QWidget):
         self.remove_button.setSizePolicy(sizePolicy)
         font = QtGui.QFont("Segoe UI", pointSize=12, weight=75)
         font.setBold(True)
+        self.restart_button.setFont(font)
+        self.remove_button.setFlat(True)
         self.remove_button.setFont(font)
         self.remove_button.setFlat(True)
         self.remove_button.setStyleSheet(
@@ -137,6 +143,13 @@ class Compare_Widget(QtWidgets.QWidget):
 
     def _connect_signals(self):
         self.remove_button.clicked.connect(self._slot_remove_clicked)
+        self.restart_button.clicked.connect(self._slot_restart_clicked)
+
+    @QtCore.pyqtSlot()
+    def _slot_restart_clicked(self):
+        #TODO are you sure, user? 
+        self.image_finder.delete_index()
+        self.restarted_signal.emit()
 
     @QtCore.pyqtSlot()
     def _slot_remove_clicked(self):
@@ -145,38 +158,54 @@ class Compare_Widget(QtWidgets.QWidget):
                 self._gently_remove(record)
         self.choices = []
         self._add_photo_group(next(self.img_iterator))
-
+        
 
     def _gently_remove(self, doc_record):
         try:
             shutil.move(doc_record['path'], self.TRASH_DIR)
+        except Exception as e:
+            with open('err_log.txt', mode='a', encoding='utf-8') as log:
+                log.write('\nshutil.move on compare_widget fail\n')
+                log.write(str(e))
+                return
+
+        try:
             self.image_finder.delete_doc(doc_record['id'])
         except Exception as e:
             with open('err_log.txt', mode='a', encoding='utf-8') as log:
-                log.write('shutil.move on compare_widget fail\n')
+                log.write('\nimgfinder.delete_doc on compare_widget fail\n')
                 log.write(str(e))
-                return
+            fn = os.path.basename(doc_record['path'])
+            old_path = doc_record['path'].replace(fn, '')
+            trash = os.path.abspath(os.path.join(self.TRASH_DIR, fn))
+            shutil.move(trash, old_path)
                 
+        # XXX image will be moved in temp folder instead deleting
         # img_path = "%r" % doc_record['path']
         # try:
-            # os.remove(img_path)
-            # os.remove(doc_record['path'])
-            # self.image_finder.delete_doc(doc_record['id'])
+        #     img_path = os.path.abspath(doc_record['path'])
+        #     os.remove(img_path)
+        #     self.image_finder.delete_doc(doc_record['id'])
         # except Exception as e:
         #     with open('err_log.txt', mode='a', encoding='utf-8') as log:
-        #         log.write('os.remove on compare_widget fail\n')
+        #         log.write('\nos.remove on compare_widget fail\n')
         #         log.write(str(e))
         #     fn = os.path.basename(doc_record['path'])
         #     old_path = doc_record['path'].replace(fn, '')
         #     trash = os.path.abspath(os.path.join(self.TRASH_DIR, fn))
         #     shutil.move(trash, old_path)
-            # FIXME show message for user
+        #     self.image_finder.add_doc(doc_record['path'])
+        #     # FIXME show message for user
         
-        # TODO send2trash lib?
 
     def _clear_layout(self, layout):
         for i in reversed(range(layout.count())):
             layout.itemAt(i).widget().deleteLater()
+
+    def delete_trash(self):
+        # TODO show message for user
+        # shutil.rmtree(self.TRASH_DIR)
+        send2trash(self.TRASH_DIR)
 
     def _add_photo_group(self, img_group):
         self._clear_layout(self.imgspace_layout)

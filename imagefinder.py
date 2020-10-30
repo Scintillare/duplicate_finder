@@ -7,8 +7,9 @@ from image_match.elasticsearch_driver import SignatureES
 
 
 class ImageFinder():
+
     def __init__(self):
-        self.BASE_DIR = None 
+        self.BASE_DIR = None
         self.DISTANCE_CUTOFF = 0.4
         self.es = Elasticsearch()
         self.ses = SignatureES(self.es, distance_cutoff=self.DISTANCE_CUTOFF)
@@ -23,10 +24,11 @@ class ImageFinder():
         is_first = True
         while True:
             # Scroll next
-            if is_first: # Initialize scroll
-                result = self.es.search(index=index, scroll="1m", **kwargs, body={
-                    "size": pagesize
-                })
+            if is_first:  # Initialize scroll
+                result = self.es.search(index=index, scroll="1m", **kwargs, 
+                                        body={
+                                            "size": pagesize
+                                        })
                 is_first = False
             else:
                 result = self.es.scroll(body={
@@ -76,13 +78,10 @@ class ImageFinder():
         self.es.indices.delete(index=self.index_name, ignore=[400, 404])
 
     def delete_doc(self, id):
-        # db.delete_by_query(index='reestr',doc_type='some_type', q={'name': 'Jacobian'})
-        try:
-            self.es.delete(index=self.index_name, doc_type='_doc', id=id, refresh=True)
-        except Exception as e:
-            print('es delete fail')
-            print(e)
-            raise ElasticsearchException(e)
+        self.es.delete(index=self.index_name, doc_type='image', id=id)
+
+    def add_doc(self, file_path):
+        self.ses.add_image(file_path)
 
     def is_index_created(self):
         return self.es.indices.exists(index=self.index_name)
